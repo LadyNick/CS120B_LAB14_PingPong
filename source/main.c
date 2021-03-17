@@ -15,6 +15,17 @@
 #include "timer.h"
 #endif
 
+//---------------------------
+//global variables
+//---------------------------
+unsigned char pattern[5] = {0x00, 0x3C, 0x24, 0x3C, 0x00};
+unsigned char row[5] = {0xFE, 0xFD, 0xFB, 0xF7, 0xEF}; 
+unsigned char update = 0;
+
+//---------------------------
+//declaring functions
+//---------------------------
+
 void transmit_data(unsigned char data, unsigned char reg) {
     //for some reason they values come out weird so you have to take each nibble, switch them and flip each nibble but not in the sense that you just flip 1 to 0 and 0 to 1, more like making abcd to dcba 
     data = (data & 0xF0) >> 4 | (data & 0x0F) << 4; 
@@ -50,6 +61,26 @@ void transmit_data(unsigned char data, unsigned char reg) {
         PORTD |= 0x04;
     }
 }
+
+enum Display_States{display}Display_State;
+int Display_Tick(int Display_State){
+	
+	switch(Display_State){
+
+		case display:
+			transmit_data(pattern[update],1);
+			transmit_data(row[update], 2);
+			++update;
+			if(update > 4){
+				update = 0;
+			}
+			Display_State = display;
+			break;
+		default: Display_State = display; break;
+	}
+	return Display_State;
+}
+
 
 int main(void) {
     DDRD = 0xFF; PORTD = 0x00;
