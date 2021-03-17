@@ -50,7 +50,7 @@ enum Ball_States{ballposition}Ball_State;
 int Ball_Tick(int Ball_State);
 enum Player1_States{paddle1}Player1_State;
 int Player1_Tick(int Player1_State);
-enum Display_States{display, delay}Display_State;
+enum Display_States{display, delay, clear}Display_State;
 int Display_Tick(int Display_State);
 enum AI_States{AIoff, AIactive}AI_State;
 int AI_Tick(int AI_State);
@@ -98,25 +98,25 @@ void transmit_data(unsigned char data, unsigned char reg) {
 
 void moveball(int direction){
 	if(direction == 1){//straightleft
-		--currbit;
+		++currbit;
 	}
 	if(direction == 2){//straightright
-		++currbit;
+		--currbit;
 	}
 	if(direction == 3){//upright
-		++currbit;
+		--currbit;
 		--currow;
 	}
 	if(direction == 4){//downright
-		++currbit;
+		--currbit;
 		++currow;
 	}
 	if(direction == 5){//upleft
-		--currbit;
+		++currbit;
 		--currow;
 	}
 	if(direction == 6){//downleft
-		--currbit;
+		++currbit;
 		++currow;
 	}
 }
@@ -283,6 +283,11 @@ int Display_Tick(int Display_State){
 			if(update == 7){
 				update = 0;
 			}
+			Display_State = clear;
+			break;
+		case clear:
+			transmit_data(0,1);
+			transmit_data(0xFF, 2);
 			Display_State = display;
 			break;	
 		//case delay: Display_State = display; break;
@@ -298,8 +303,8 @@ int main(void) {
     DDRB = 0xFF; PORTB = 0x00; //This is for the leds later for gamemode and score
     DDRA = 0x00; PORTA = 0xFF;
 
-    static task task1, task2, task3;
-    task *tasks[] = {&task1, &task2, &task3};
+    static task task1, task2, task3, task4, task5;
+    task *tasks[] = {&task1, &task2, &task3, &task4, &task5};
     const unsigned short numTasks = sizeof(tasks)/sizeof(task*);
 
     const char start = -1;
@@ -312,15 +317,27 @@ int main(void) {
 	
     //MOVE PLAYER 1
     task2.state = start;
-    task2.period = 300; //base speed for how fast the user can move their paddle 
+    task2.period = 200; //base speed for how fast the user can move their paddle 
     task2.elapsedTime = task2.period;
     task2.TickFct = &Player1_Tick;
 	
     //DISPLAY 
     task3.state = start;
     task3.period = 1; //constantly displaying
-    task3.elapsedTime = task2.period;
+    task3.elapsedTime = task3.period;
     task3.TickFct = &Display_Tick;
+
+    //PLAYER2 AI
+    task4.state = start;
+    task4.period = 200;
+    task4.elapsedTime = task4.period;
+    task4.TickFct = &Player2_Tick;
+
+    //MENU
+    task5.state = start;
+    task5.period = 300; //to match ball speed
+    task5.elapsedTime = task5.period;
+    task5.TickFct = &Menu_Tick;
 
     TimerSet(1);
     TimerOn();
