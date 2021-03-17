@@ -23,7 +23,7 @@ unsigned char pattern[5] = {0x00, 0x81, 0xC1, 0x81, 0x00}; //ball will start on 
 unsigned char row[5] = {0xFE, 0xFD, 0xFB, 0xF7, 0xEF}; 
 unsigned char update = 0;
 unsigned char P1POS; //get position of paddle's highest bit by pattern index
-unsigned char P2AIPOS; //this will get the higher part of the 3 bits position by it's pattern index
+unsigned char P2AIPOS = 1; //this will get the higher part of the 3 bits position by it's pattern index
 unsigned char P1UP; //A0
 unsigned char P1DOWN; //A1
 unsigned char P2UP;   //A2 later
@@ -210,7 +210,7 @@ int Player1_Tick(int Player1_State){
 			}
 			else if(P1DOWN){
 				//this is the only option left, but I want the option that its doing to be obvious in the code
-				if(P1POS == 4){
+				if(P1POS == 2){
 					//do nothing, it's at the bottom edge
 				}
 				else{
@@ -224,9 +224,24 @@ int Player1_Tick(int Player1_State){
 	return Player1_State;
 }
 
+int Player2_Tick(int Player2_State){
+	unsigned char got2 = 0;
+
+	switch(Player2_State){
+		case P2active:
+		//	P2AIPOS = 2;
+			Player2_State = P2active;
+			break;
+		case P2off:
+			//stuff will go here later with the menu;
+			break;
+		default: Player2_State = P2active; break;
+	}
+	return Player2_State;
+}
+
 
 int Display_Tick(int Display_State){
-	
 	switch(Display_State){
 		//i have an idea so im going to ignore the computer paddle and the ball for now
 		case display:
@@ -249,10 +264,10 @@ int Display_Tick(int Display_State){
 				transmit_data(row[P2AIPOS], 2);
 			}
 			if(update == 4){
-				transmit_data(row[P2AIPOS], 2);
+				transmit_data(row[P2AIPOS + 1], 2);
 			}
 			if(update == 5){
-				transmit_data(row[P2AIPOS], 2);
+				transmit_data(row[P2AIPOS + 2], 2);
 			}	 
 		  	if(update == 6){
 				//this will be for displaying the ball but ill worry about that later
@@ -293,13 +308,13 @@ int main(void) {
 	
     //MOVE PLAYER 1
     task2.state = start;
-    task2.period = 100; //base speed for how fast the user can move their paddle 
+    task2.period = 300; //base speed for how fast the user can move their paddle 
     task2.elapsedTime = task2.period;
     task2.TickFct = &Player1_Tick;
 	
     //DISPLAY 
     task3.state = start;
-    task3.period = 2; //constantly displaying
+    task3.period = 1; //constantly displaying
     task3.elapsedTime = task2.period;
     task3.TickFct = &Display_Tick;
 
