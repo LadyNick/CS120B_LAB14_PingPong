@@ -158,7 +158,7 @@ void paddledown(int player){
 		//set p2 paddle
 		pattern[P2AIPOS + 1] = SetBit(pattern[P2AIPOS + 1], 7, 1);
 		pattern[P2AIPOS + 2] = SetBit(pattern[P2AIPOS + 2], 7, 1);
-		pattern[P2AIPOS + 3] = SetBit(pattern[P1AIPOS + 3], 7, 1);
+		pattern[P2AIPOS + 3] = SetBit(pattern[P2AIPOS + 3], 7, 1);
 	}
 }
 
@@ -199,7 +199,7 @@ int Player1_Tick(int Player1_State){
 			}
 			else if(P1UP){
 				//move the paddle up by 1, but check if its already at the max
-				if(P1POS == 0)){
+				if(P1POS == 0){
 					//do nothing, it's at the top edge
 				}
 				else{
