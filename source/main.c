@@ -23,7 +23,7 @@ unsigned char pattern[5] = {0x00, 0x81, 0xC1, 0x81, 0x00}; //ball will start on 
 unsigned char row[5] = {0xFE, 0xFD, 0xFB, 0xF7, 0xEF}; 
 unsigned char update = 0;
 unsigned char P1POS; //get position of paddle's highest bit by pattern index
-unsigned char P2AIPOS = 1; //this will get the higher part of the 3 bits position by it's pattern index
+unsigned char P2AIPOS; //this will get the higher part of the 3 bits position by it's pattern index
 unsigned char P1UP; //A0
 unsigned char P1DOWN; //A1
 unsigned char P2UP;   //A2 later
@@ -167,16 +167,20 @@ void paddledown(int player){
 //bool checklast();
 
 int Ball_Tick(int Ball_State){
-	/*switch(Ball_State){
-
-	}*/
+	switch(Ball_State){
+		case ballposition:
+			currbit = 6;
+			currrow = 2;
+			Ball_State = ballposition;
+			break;
+		default: Ball_State = ballposition;
+	}
 	return Ball_State;
 }
 
 
 int Player1_Tick(int Player1_State){
 	unsigned char got1 = 0; //for when position is determined
-	
 	switch(Player1_State){	
 		case paddle1:
 			//small segment to set P1POS
@@ -226,13 +230,14 @@ int Player1_Tick(int Player1_State){
 
 int Player2_Tick(int Player2_State){
 	unsigned char got2 = 0;
-
+	P2AIPOS = 1;
 	switch(Player2_State){
 		case P2active:
-		//	P2AIPOS = 2;
+			P2AIPOS = 1;
 			Player2_State = P2active;
 			break;
 		case P2off:
+			Player2_State = P2active;
 			//stuff will go here later with the menu;
 			break;
 		default: Player2_State = P2active; break;
@@ -270,7 +275,8 @@ int Display_Tick(int Display_State){
 				transmit_data(row[P2AIPOS + 2], 2);
 			}	 
 		  	if(update == 6){
-				//this will be for displaying the ball but ill worry about that later
+				transmit_data((1 << currbit), 1); 
+				transmit_data(row[currrow], 2);
 			}	
 			Display_State = delay;
 			break;
