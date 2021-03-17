@@ -9,6 +9,7 @@
  */
 #include <avr/io.h>
 #include <stdbool.h>
+#include <stdio.h>
 #ifdef _SIMULATE_
 #include "simAVRHeader.h"
 #include "scheduler.h"
@@ -56,7 +57,7 @@ enum Ball_States{ballposition}Ball_State;
 int Ball_Tick(int Ball_State);
 enum Player1_States{paddle1}Player1_State;
 int Player1_Tick(int Player1_State);
-enum Display_States{display}Display_State;
+enum Display_States{display, delay}Display_State;
 int Display_Tick(int Display_State);
 enum AI_States{AIoff, AIactive}AI_State;
 int AI_Tick(int AI_State);
@@ -234,8 +235,9 @@ int Display_Tick(int Display_State){
 			if(update > 4){
 				update = 0;
 			}
-			Display_State = display;
+			Display_State = delay;
 			break;
+		case delay: Display_State = display; break;
 		default: Display_State = display; break;
 	}
 	return Display_State;
@@ -262,7 +264,7 @@ int main(void) {
 	
     //MOVE PLAYER 1
     task2.state = start;
-    task2.period = 300; //base speed for how fast the user can move their paddle 
+    task2.period = 100; //base speed for how fast the user can move their paddle 
     task2.elapsedTime = task2.period;
     task2.TickFct = &Player1_Tick;
 	
@@ -281,7 +283,7 @@ int main(void) {
 	    P1DOWN = ~PINA & 0x02;
 	   // P2UP P2 will use the keypad
 	   // P2DOWN 
-	    reset = ~PINA & 0x80;
+	   // reset = ~PINA & 0x80;
 	    
 	    for(int i=0; i<numTasks; i++){ //Scheduler code
 			if(tasks[i]->elapsedTime >= tasks[i]->period){
