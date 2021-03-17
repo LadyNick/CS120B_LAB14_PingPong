@@ -10,6 +10,7 @@
 #include <avr/io.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <stdlib.h>
 #ifdef _SIMULATE_
 #include "simAVRHeader.h"
 #include "scheduler.h"
@@ -183,7 +184,6 @@ int Ball_Tick(int Ball_State){
 int Player1_Tick(int Player1_State){
 	switch(Player1_State){	
 		case paddle1:	
-			
 			if(!P1UP && !P1DOWN){
 				//no movement
 			}
@@ -217,17 +217,25 @@ int Player1_Tick(int Player1_State){
 }
 
 int Player2_Tick(int Player2_State){
-//	P2AIPOS = 1;
 	switch(Player2_State){
 		case P2active:
-		//	P2AIPOS = 1;
 			Player2_State = P2active;
 			break;
-		case P2off:
-			Player2_State = P2active;
-			//stuff will go here later with the menu;
+		case P2off: //if the P2 is off, it means the AI is on
+			if((rand() % 3) == 1){
+				//I want it to not be too hard to beat the AI because the matrix is so small
+				//so it will react only when the ball is at bits from 1-3
+				if((currbit == 1) || (currbit == 2) || (currbit == 3)){
+					if(currow < P2AIPOS){
+						--P2AIPOS;		
+					}
+					if(currow > P2AIPOS){
+						++P2AIPOS;
+					}
+				}
+			Player2_State = P2off;
 			break;
-		default: Player2_State = P2active; break;
+		default: Player2_State = P2off; break;
 	}
 	return Player2_State;
 }
