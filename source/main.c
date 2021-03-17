@@ -23,7 +23,7 @@ unsigned char pattern[5] = {0x00, 0x81, 0xC1, 0x81, 0x00}; //ball will start on 
 unsigned char row[5] = {0xFE, 0xFD, 0xFB, 0xF7, 0xEF}; 
 unsigned char update = 0;
 unsigned char P1POS; //get position of paddle's highest bit by pattern index
-unsigned char P2AIPOS; //this will get the higher part of the 3 bits position by it's pattern index
+unsigned char P2AIPOS = 1; //this will get the higher part of the 3 bits position by it's pattern index
 unsigned char P1UP; //A0
 unsigned char P1DOWN; //A1
 unsigned char P2UP;   //A2 later
@@ -230,10 +230,10 @@ int Player1_Tick(int Player1_State){
 
 int Player2_Tick(int Player2_State){
 	unsigned char got2 = 0;
-	P2AIPOS = 1;
+//	P2AIPOS = 1;
 	switch(Player2_State){
 		case P2active:
-			P2AIPOS = 1;
+		//	P2AIPOS = 1;
 			Player2_State = P2active;
 			break;
 		case P2off:
@@ -275,14 +275,14 @@ int Display_Tick(int Display_State){
 				transmit_data(row[P2AIPOS + 2], 2);
 			}	 
 		  	if(update == 6){
-				transmit_data((1 << currbit), 1); 
+				transmit_data((1 << currbit), 1);
 				transmit_data(row[currrow], 2);
 			}	
 			Display_State = delay;
 			break;
 		case delay:
 			++update;
-			if(update == 7){
+			if(update == 8){
 				update = 0;
 			}
 			Display_State = display;
