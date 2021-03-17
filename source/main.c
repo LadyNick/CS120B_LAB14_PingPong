@@ -32,7 +32,7 @@ unsigned char reset;  //A7 later
 unsigned char ballspeed; //later
 unsigned char spin; //later for if the paddle moves when hitting ball
 unsigned char currbit = 6; //Which bit in the pattern is the ball
-unsigned char currrow = 2; //which row the ball is in
+unsigned char currow = 2; //which row the ball is in
 unsigned char score; //later on
 unsigned char gamemode; //later on for single or multi
 int direction = 2; 
@@ -105,7 +105,7 @@ void moveball(int direction){
 	}
 	if(direction == 3){//upright
 		++currbit;
-		--currrow;
+		--currow;
 	}
 	if(direction == 4){//downright
 		++currbit;
@@ -164,7 +164,7 @@ int Ball_Tick(int Ball_State){
 					}
 					else{ direction = 3; }
 				}
-				if(currow == P2PAIPOS + 2){//^^
+				if(currow == P2AIPOS + 2){//^^
 					if(P2AIPOS == 2){
 						direction = 3;
 					}
@@ -233,7 +233,7 @@ int Player2_Tick(int Player2_State){
 }
 
 int Menu_Tick(int Menu_State){
-	switch(int Menu_State){
+	switch(Menu_State){
 		case waiting:
 			if((currbit == 0) || (currbit == 7)){
 				game = 0;
@@ -274,7 +274,7 @@ int Display_Tick(int Display_State){
 			}	 
 		  	if((update == 6) && game){
 				transmit_data((1 << currbit), 1);
-				transmit_data(row[currrow], 2);
+				transmit_data(row[currow], 2);
 			}	
 			Display_State = delay;
 			break;
