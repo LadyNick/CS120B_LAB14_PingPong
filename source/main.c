@@ -230,7 +230,9 @@ int Display_Tick(int Display_State){
 	switch(Display_State){
 		//i have an idea so im going to ignore the computer paddle and the ball for now
 		case display:
-			transmit_data(0x01, 1);
+			if((update >= 0) && (update < 3)){
+				transmit_data(0x01, 1);
+			}
 			if(update == 0){
 				transmit_data(row[P1POS],2);
 			}
@@ -240,11 +242,26 @@ int Display_Tick(int Display_State){
 			if(update == 2){
 				transmit_data(row[P1POS + 2], 2);
 			}
+			if((update > 2) && (update < 6)){
+			        transmit_data(0x80, 1);
+			}
+			if(update == 3){
+				transmit_data(row[P2AIPOS], 2);
+			}
+			if(update == 4){
+				transmit_data(row[P2AIPOS], 2);
+			}
+			if(update == 5){
+				transmit_data(row[P2AIPOS], 2);
+			}	 
+		  	if(update == 6){
+				//this will be for displaying the ball but ill worry about that later
+			}	
 			Display_State = delay;
 			break;
 		case delay:
 			++update;
-			if(update == 3){
+			if(update == 7){
 				update = 0;
 			}
 			Display_State = display;
