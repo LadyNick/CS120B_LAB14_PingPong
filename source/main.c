@@ -21,6 +21,8 @@
 unsigned char pattern[5] = {0x00, 0x81, 0xC1, 0x81, 0x00}; //ball will start on the left middle going to the right
 unsigned char row[5] = {0xFE, 0xFD, 0xFB, 0xF7, 0xEF}; 
 unsigned char update = 0;
+unsigned char P1POS; //get position of paddle's highest bit by pattern index
+unsigned char P2AIPOS; //this will get the higher part of the 3 bits position by it's pattern index
 unsigned char P1UP; //A0
 unsigned char P1DOWN; //A1
 unsigned char P2UP;   //A2 later
@@ -37,14 +39,12 @@ int direction;
 //declaring functions
 //---------------------------
 void transmit_data(unsigned char data, unsigned char reg);
-void move(int direction);
+void moveball(int direction);
 unsigned char SetBit(unsigned char x, unsigned char k, unsigned char b);
 unsigned char GetBit(unsigned char x, unsigned char k);
 bool checkcenter(int centerbit); //these are to check which part of the paddle the ball hits
 bool checktop(int topbit); 
 bool checkbot(int botbit);
-bool checktopmax(int player); //these check for the movement of the paddle side 1 is p1, side 2 is p2/AI
-bool checkbotmax(int player);
 void paddleup(int player);
 void paddledown(int player);
 bool checkfirst();//this checks for the top row, so if it hits top row it bounces off
@@ -100,6 +100,8 @@ void transmit_data(unsigned char data, unsigned char reg) {
     }
 }
 
+void moveball(int direction);
+
 unsigned char SetBit(unsigned char x, unsigned char k, unsigned char b){
 	return(b ? (x | (0x01 << k)) : (x & ~(0x01 << k)) );
 }
@@ -107,6 +109,15 @@ unsigned char SetBit(unsigned char x, unsigned char k, unsigned char b){
 unsigned char GetBit(unsigned char x, unsigned char k){
 	return ((x & (0x01 << k)) != 0);
 }
+
+//bool checkcenter(int centerbit);
+//bool checktop(int topbit); 
+//bool checkbot(int botbit);
+
+void paddleup(int player);
+void paddledown(int player);
+//bool checkfirst();
+//bool checklast();
 
 int Ball_Tick(int Ball_State){
 	switch(Ball_State){
@@ -117,8 +128,23 @@ int Ball_Tick(int Ball_State){
 
 
 int Player1_Tick(int Player1_State){
-	switch(Player1_State){
+	unsigned char got1 = 0; //for when position is determined
+	
+	switch(Player1_State){	
 		case paddle1:
+			//small segment to set P1POS
+			for(int i = 0; i < 5; ++i){
+				if(got1 == 1){
+					//do nothing, position found
+				}
+				else if(GetBit(pattern[i],0)){
+					P1POS = i;
+					got1 = 1;
+				}
+			}
+			got1 = 0;	
+				
+			
 			if(!P1UP && !P1DOWN){
 				//no movement
 			}
@@ -127,7 +153,7 @@ int Player1_Tick(int Player1_State){
 			}
 			else if(P1UP){
 				//move the paddle up by 1, but check if its already at the max
-				if(checktopmax(1)){
+				if(P1POS == 0)){
 					//do nothing, it's at the top edge
 				}
 				else{
@@ -137,7 +163,7 @@ int Player1_Tick(int Player1_State){
 			}
 			else if(P1DOWN){
 				//this is the only option left, but I want the option that its doing to be obvious in the code
-				if(checkbotmax(1)){
+				if(P1POS == 4){
 					//do nothing, it's at the bottom edge
 				}
 				else{
@@ -146,7 +172,7 @@ int Player1_Tick(int Player1_State){
 				}
 			}
 			break;
-		case default: Player1_State = paddle1; break;
+		default: Player1_State = paddle1; break;
 	}
 	return Player1_State;
 }
