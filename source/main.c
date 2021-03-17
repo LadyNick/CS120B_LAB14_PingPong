@@ -254,7 +254,7 @@ int Display_Tick(int Display_State){
 			Display_State = display1;
 			break;
 		//case delay: Display_State = display; break;
-		default: Display_State = display; break;
+		default: Display_State = display1; break;
 	}
 	return Display_State;
 }
