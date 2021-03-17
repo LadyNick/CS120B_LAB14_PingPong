@@ -167,9 +167,9 @@ void paddledown(int player){
 //bool checklast();
 
 int Ball_Tick(int Ball_State){
-	switch(Ball_State){
+	/*switch(Ball_State){
 
-	}
+	}*/
 	return Ball_State;
 }
 
@@ -227,7 +227,6 @@ int Player1_Tick(int Player1_State){
 
 int Display_Tick(int Display_State){
 	switch(Display_State){
-
 		case display1:
 			transmit_data(pattern[0],1);
 			transmit_data(row[0], 2);
@@ -286,7 +285,7 @@ int main(void) {
 	
     //DISPLAY 
     task3.state = start;
-    task3.period = 1; //constantly displaying
+    task3.period = 2; //constantly displaying
     task3.elapsedTime = task2.period;
     task3.TickFct = &Display_Tick;
 
@@ -297,6 +296,7 @@ int main(void) {
 
 	    P1UP = ~PINA & 0x01;
 	    P1DOWN = ~PINA & 0x02;
+	    PORTB = PINUP;
 	   // P2UP P2 will use the keypad
 	   // P2DOWN 
 	   // reset = ~PINA & 0x80;
