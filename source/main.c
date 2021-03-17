@@ -57,7 +57,7 @@ enum Ball_States{ballposition}Ball_State;
 int Ball_Tick(int Ball_State);
 enum Player1_States{paddle1}Player1_State;
 int Player1_Tick(int Player1_State);
-enum Display_States{display, delay}Display_State;
+enum Display_States{display1, display2, display3, display4, display5}Display_State;
 int Display_Tick(int Display_State);
 enum AI_States{AIoff, AIactive}AI_State;
 int AI_Tick(int AI_State);
@@ -228,16 +228,32 @@ int Player1_Tick(int Player1_State){
 int Display_Tick(int Display_State){
 	switch(Display_State){
 
-		case display:
-			transmit_data(pattern[update],1);
-			transmit_data(row[update], 2);
-			++update;
-			if(update > 4){
-				update = 0;
-			}
-			Display_State = delay;
+		case display1:
+			transmit_data(pattern[0],1);
+			transmit_data(row[0], 2);
+			Display_State = display2;
 			break;
-		case delay: Display_State = display; break;
+		case display2:
+			transmit_data(pattern[1],1);
+			transmit_data(row[1], 2);
+			Display_State = display3;
+			break;
+		case display3:
+			transmit_data(pattern[2],1);
+			transmit_data(row[2], 2);
+			Display_State = display4;
+			break;
+		case display4:
+			transmit_data(pattern[3],1);
+			transmit_data(row[3], 2);
+			Display_State = display5;
+			break;
+		case display5:
+			transmit_data(pattern[4],1);
+			transmit_data(row[4], 2);
+			Display_State = display1;
+			break;
+		//case delay: Display_State = display; break;
 		default: Display_State = display; break;
 	}
 	return Display_State;
