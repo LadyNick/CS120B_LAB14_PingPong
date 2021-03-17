@@ -38,9 +38,13 @@ int direction;
 //---------------------------
 void transmit_data(unsigned char data, unsigned char reg);
 void move(int direction);
+unsigned char SetBit(unsigned char x, unsigned char k, unsigned char b);
+unsigned char GetBit(unsigned char x, unsigned char k);
 bool checkcenter(); //these are to check which part of the paddle the ball hits
-bool checktop();
+bool checktop(); 
 bool checkbot();
+bool checkfirst();//this checks for the top row, so if it hits top row it bounces off
+bool checklast();//this checks for bottom row, so if it hits the bottom row it bounces off
 //--------------------------
 //declaring SMs and SM functions
 //--------------------------
@@ -50,9 +54,9 @@ enum Player1_States{paddle1}Player1_State;
 int Player1_Tick(int Player1_State);
 enum Display_States{display}Display_State;
 int Display_Tick(int Display_State);
-enum AI_States{off, active}AI_State;
+enum AI_States{AIoff, AIactive}AI_State;
 int AI_Tick(int AI_State);
-enum Player2_States{off, active}Player2_State;
+enum Player2_States{P2off, P2active}Player2_State;
 int Player2_Tick(int Player2_State);
 
 //--------------------------
@@ -91,6 +95,14 @@ void transmit_data(unsigned char data, unsigned char reg) {
         // set RCLK = 1. 
         PORTD |= 0x04;
     }
+}
+
+unsigned char SetBit(unsigned char x, unsigned char k, unsigned char b){
+	return(b ? (x | (0x01 << k)) : (x & ~(0x01 << k)) );
+}
+
+unsigned char GetBit(unsigned char x, unsigned char k){
+	return ((x & (0x01 << k)) != 0);
 }
 
 int Ball_Tick(int Ball_State){
@@ -164,8 +176,8 @@ int main(void) {
 
 	    P1UP = ~PINA & 0x01;
 	    P1DOWN = ~PINA & 0x02;
-	    P2UP = ~PINA & 0x04;
-	    P2DOWN = ~PINA & 0x08;
+	   // P2UP P2 will use the keypad
+	   // P2DOWN 
 	    reset = ~PINA & 0x80;
 	    
 	    for(int i=0; i<numTasks; i++){ //Scheduler code
