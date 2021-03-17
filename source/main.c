@@ -226,15 +226,25 @@ int Player1_Tick(int Player1_State){
 
 
 int Display_Tick(int Display_State){
+	
 	switch(Display_State){
+		//i have an idea so im going to ignore the computer paddle and the ball for now
 		case display:
-			transmit_data(pattern[update],1);
-			transmit_data(row[update], 2);
+			transmit_data(0x01, 1);
+			if(update == 0){
+				transmit_data(row[P1POS],2);
+			}
+			if(update == 1){
+				transmit_data(row[P1POS + 1], 2);
+			}
+			if(update == 2){
+				transmit_data(row[P1POS + 2], 2);
+			}
 			Display_State = delay;
 			break;
 		case delay:
 			++update;
-			if(update == 5){
+			if(update == 3){
 				update = 0;
 			}
 			Display_State = display;
