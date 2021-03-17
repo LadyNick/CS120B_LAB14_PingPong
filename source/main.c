@@ -40,9 +40,13 @@ void transmit_data(unsigned char data, unsigned char reg);
 void move(int direction);
 unsigned char SetBit(unsigned char x, unsigned char k, unsigned char b);
 unsigned char GetBit(unsigned char x, unsigned char k);
-bool checkcenter(); //these are to check which part of the paddle the ball hits
-bool checktop(); 
-bool checkbot();
+bool checkcenter(int centerbit); //these are to check which part of the paddle the ball hits
+bool checktop(int topbit); 
+bool checkbot(int botbit);
+bool checktopmax(int player); //these check for the movement of the paddle side 1 is p1, side 2 is p2/AI
+bool checkbotmax(int player);
+void paddleup(int player);
+void paddledown(int player);
 bool checkfirst();//this checks for the top row, so if it hits top row it bounces off
 bool checklast();//this checks for bottom row, so if it hits the bottom row it bounces off
 //--------------------------
@@ -58,7 +62,6 @@ enum AI_States{AIoff, AIactive}AI_State;
 int AI_Tick(int AI_State);
 enum Player2_States{P2off, P2active}Player2_State;
 int Player2_Tick(int Player2_State);
-
 //--------------------------
 
 void transmit_data(unsigned char data, unsigned char reg) {
@@ -115,7 +118,35 @@ int Ball_Tick(int Ball_State){
 
 int Player1_Tick(int Player1_State){
 	switch(Player1_State){
-
+		case paddle1:
+			if(!P1UP && !P1DOWN){
+				//no movement
+			}
+			else if(P1UP && P1DOWN){
+				//no movement
+			}
+			else if(P1UP){
+				//move the paddle up by 1, but check if its already at the max
+				if(checktopmax(1)){
+					//do nothing, it's at the top edge
+				}
+				else{
+					//move paddle up
+					paddleup(1);
+				}
+			}
+			else if(P1DOWN){
+				//this is the only option left, but I want the option that its doing to be obvious in the code
+				if(checkbotmax(1)){
+					//do nothing, it's at the bottom edge
+				}
+				else{
+					//move paddle1 down
+					paddledown(1);
+				}
+			}
+			break;
+		case default: Player1_State = paddle1; break;
 	}
 	return Player1_State;
 }
