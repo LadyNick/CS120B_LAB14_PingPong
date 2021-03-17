@@ -21,10 +21,22 @@
 unsigned char pattern[5] = {0x00, 0x3C, 0x24, 0x3C, 0x00};
 unsigned char row[5] = {0xFE, 0xFD, 0xFB, 0xF7, 0xEF}; 
 unsigned char update = 0;
+unsigned char P1UP; //A0
+unsigned char P1DOWN; //A1
+unsigned char P2UP;   //A2
+unsigned char P2DOWN; //A3
+unsigned char reset;  //A7
+int direction;
 
 //---------------------------
 //declaring functions
 //---------------------------
+void move(int direction);
+bool checkcenter(); //these are to check which part of the paddle the ball hits
+bool checktop();
+bool checkbot();
+
+//--------------------------
 
 void transmit_data(unsigned char data, unsigned char reg) {
     //for some reason they values come out weird so you have to take each nibble, switch them and flip each nibble but not in the sense that you just flip 1 to 0 and 0 to 1, more like making abcd to dcba 
@@ -60,6 +72,24 @@ void transmit_data(unsigned char data, unsigned char reg) {
         // set RCLK = 1. 
         PORTD |= 0x04;
     }
+}
+
+enum Ball_States{ballposition}Ball_State;
+int Ball_Tick(int Ball_State){
+	
+	switch(Ball_State){
+
+	}
+	return Ball_State;
+}
+
+enum Player1_States{paddle1}Player1_State;
+int Player1_Tick(int Player1_State){
+
+	switch(Player1_State){
+
+	}
+	return Player1_State;
 }
 
 enum Display_States{display}Display_State;
@@ -115,8 +145,14 @@ int main(void) {
     TimerOn();
     
     while (1) {
+
+	    P1UP = ~PINA & 0x01;
+	    P1DOWN = ~PINA & 0x02;
+	    P2UP = ~PINA & 0x04;
+	    P2DOWN = ~PINA & 0x08;
+	    reset = ~PINA & 0x80;
 	    
-	    for(i=0; i<numTasks; i++){ //Scheduler code
+	    for(int i=0; i<numTasks; i++){ //Scheduler code
 			if(tasks[i]->elapsedTime >= tasks[i]->period){
 				tasks[i]->state = tasks[i]->TickFct(tasks[i]->state);
 				tasks[i]->elapsedTime = 0;
