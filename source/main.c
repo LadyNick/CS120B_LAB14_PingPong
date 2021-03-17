@@ -100,7 +100,7 @@ void transmit_data(unsigned char data, unsigned char reg) {
     }
 }
 
-void moveball(int direction);
+//void moveball(int direction);
 
 unsigned char SetBit(unsigned char x, unsigned char k, unsigned char b){
 	return(b ? (x | (0x01 << k)) : (x & ~(0x01 << k)) );
@@ -114,8 +114,54 @@ unsigned char GetBit(unsigned char x, unsigned char k){
 //bool checktop(int topbit); 
 //bool checkbot(int botbit);
 
-void paddleup(int player);
-void paddledown(int player);
+void paddleup(int player){
+	//clear & replace the paddle
+	if(player == 1){
+		//clear p1 paddle
+		for(int i = 0; i < 5; ++i){
+			pattern[i] = SetBit(pattern[i], 0, 0);	
+		}
+		//set p1 paddle
+		pattern[P1POS - 1] = SetBit(pattern[P1POS - 1], 0, 1);
+		pattern[P1POS] = SetBit(pattern[P1POS], 0, 1);
+		pattern[P1POS + 1] = SetBit(pattern[P1POS + 1], 0, 1);
+	}
+	if(player == 2){
+		//clear p2 paddle
+		for(int i = 0; i < 5; ++i){
+			pattern[i] = SetBit(pattern[i], 7, 0);	
+		}
+		//set p2 paddle
+		pattern[P2AIPOS - 1] = SetBit(pattern[P2AIPOS - 1], 7, 1);
+		pattern[P2AIPOS] = SetBit(pattern[P2AIPOS], 7, 1);
+		pattern[P2AIPOS + 1] = SetBit(pattern[P2AIPOS + 1], 7, 1);
+	}	
+}
+
+void paddledown(int player){
+	//Clear & replace paddle
+	if(player == 1){
+		//clear p1 paddle
+		for(int i = 0; i < 5; ++i){
+			pattern[i] = SetBit(pattern[i], 0, 0);	
+		}
+		//set p1 paddle
+		pattern[P1POS + 1] = SetBit(pattern[P1POS + 1], 0, 1);
+		pattern[P1POS + 2] = SetBit(pattern[P1POS + 2], 0, 1);
+		pattern[P1POS + 3] = SetBit(pattern[P1POS + 3], 0, 1);
+	}
+	if(player == 2){
+		//clear p2 paddle
+		for(int i = 0; i < 5; ++i){
+			pattern[i] = SetBit(pattern[i], 7, 0);	
+		}
+		//set p2 paddle
+		pattern[P2AIPOS + 1] = SetBit(pattern[P2AIPOS + 1], 7, 1);
+		pattern[P2AIPOS + 2] = SetBit(pattern[P2AIPOS + 2], 7, 1);
+		pattern[P2AIPOS + 3] = SetBit(pattern[P1AIPOS + 3], 7, 1);
+	}
+}
+
 //bool checkfirst();
 //bool checklast();
 
