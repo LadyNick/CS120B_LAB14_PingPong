@@ -36,6 +36,7 @@ unsigned char currrow = 2; //which row the ball is in
 unsigned char score; //later on
 unsigned char gamemode; //later on for single or multi
 int direction = 2; 
+unsigned char game = 1;
 //1 is straightleft, 2 straightright, 3upright, 4 downright, 5 upleft, 6 downleft
 //---------------------------
 //declaring functions
@@ -55,6 +56,8 @@ enum AI_States{AIoff, AIactive}AI_State;
 int AI_Tick(int AI_State);
 enum Player2_States{P2off, P2active}Player2_State;
 int Player2_Tick(int Player2_State);
+enum Menu_States{waiting}Menu_State;
+int Menu_Tick(int Menu_State);
 //--------------------------
 
 void transmit_data(unsigned char data, unsigned char reg) {
@@ -123,13 +126,13 @@ int Ball_Tick(int Ball_State){
 	switch(Ball_State){
 		case ballposition:
 			if(currow == 0){
-				if((currbit != 0) && (currbit != 6)){
+				if((currbit != 1) && (currbit != 6)){
 				if(direction == 3){ direction = 4;}
 				if(direction == 5){ direction = 6;}
 				}
 			}
 			else if(currow == 4){
-				if((currbit != 0) && (currbit != 6)){ 
+				if((currbit != 1) && (currbit != 6)){ 
 				if(direction == 4){ direction = 3;}
 				if(direction == 6){ direction = 5;}
 				}
@@ -167,6 +170,7 @@ int Ball_Tick(int Ball_State){
 					}
 					else{ direction = 4; }
 				}
+			}
 			moveball(direction);						
 			Ball_State = ballposition;
 			break;
@@ -228,6 +232,17 @@ int Player2_Tick(int Player2_State){
 	return Player2_State;
 }
 
+int Menu_Tick(int Menu_State){
+	switch(int Menu_State){
+		case waiting:
+			if((currbit == 0) || (currbit == 7)){
+				game = 0;
+			}
+			Menu_State = waiting; break;
+		default: Menu_State = waiting; break;
+	}
+	return Menu_State;
+}
 
 int Display_Tick(int Display_State){
 	switch(Display_State){
@@ -257,7 +272,7 @@ int Display_Tick(int Display_State){
 			if(update == 5){
 				transmit_data(row[P2AIPOS + 2], 2);
 			}	 
-		  	if(update == 6){
+		  	if((update == 6) && game){
 				transmit_data((1 << currbit), 1);
 				transmit_data(row[currrow], 2);
 			}	
@@ -265,7 +280,7 @@ int Display_Tick(int Display_State){
 			break;
 		case delay:
 			++update;
-			if(update == 8){
+			if(update == 7){
 				update = 0;
 			}
 			Display_State = display;
