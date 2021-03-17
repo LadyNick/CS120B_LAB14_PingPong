@@ -18,23 +18,42 @@
 //---------------------------
 //global variables
 //---------------------------
-unsigned char pattern[5] = {0x00, 0x3C, 0x24, 0x3C, 0x00};
+unsigned char pattern[5] = {0x00, 0x81, 0xC1, 0x81, 0x00}; //ball will start on the left middle going to the right
 unsigned char row[5] = {0xFE, 0xFD, 0xFB, 0xF7, 0xEF}; 
 unsigned char update = 0;
 unsigned char P1UP; //A0
 unsigned char P1DOWN; //A1
-unsigned char P2UP;   //A2
-unsigned char P2DOWN; //A3
-unsigned char reset;  //A7
+unsigned char P2UP;   //A2 later
+unsigned char P2DOWN; //A3 later
+unsigned char reset;  //A7 later
+unsigned char ballspeed; //later
+unsigned char spin; //later for if the paddle moves when hitting ball
+unsigned char currbit; //Which bit in the pattern is the ball
+unsigned char currrow; //which row the ball is in
+unsigned char score; //later on
+unsigned char gamemode; //later on for single or multi
 int direction;
-
 //---------------------------
 //declaring functions
 //---------------------------
+void transmit_data(unsigned char data, unsigned char reg);
 void move(int direction);
 bool checkcenter(); //these are to check which part of the paddle the ball hits
 bool checktop();
 bool checkbot();
+//--------------------------
+//declaring SMs and SM functions
+//--------------------------
+enum Ball_States{ballposition}Ball_State;
+int Ball_Tick(int Ball_State);
+enum Player1_States{paddle1}Player1_State;
+int Player1_Tick(int Player1_State);
+enum Display_States{display}Display_State;
+int Display_Tick(int Display_State);
+enum AI_States{off, active}AI_State;
+int AI_Tick(int AI_State);
+enum Player2_States{off, active}Player2_State;
+int Player2_Tick(int Player2_State);
 
 //--------------------------
 
@@ -74,27 +93,23 @@ void transmit_data(unsigned char data, unsigned char reg) {
     }
 }
 
-enum Ball_States{ballposition}Ball_State;
 int Ball_Tick(int Ball_State){
-	
 	switch(Ball_State){
 
 	}
 	return Ball_State;
 }
 
-enum Player1_States{paddle1}Player1_State;
-int Player1_Tick(int Player1_State){
 
+int Player1_Tick(int Player1_State){
 	switch(Player1_State){
 
 	}
 	return Player1_State;
 }
 
-enum Display_States{display}Display_State;
+
 int Display_Tick(int Display_State){
-	
 	switch(Display_State){
 
 		case display:
@@ -115,7 +130,8 @@ int Display_Tick(int Display_State){
 int main(void) {
     DDRD = 0xFF; PORTD = 0x00;
     DDRC = 0xFF; PORTC = 0x00;
-
+    DDRB = 0xFF; PORTB = 0x00; //This is for the leds later for gamemode and score
+    DDRA = 0x00; PORTA = 0xFF;
 
     static task task1, task2, task3;
     task *tasks[] = {&task1, &task2, &task3};
