@@ -19,10 +19,10 @@
 //---------------------------
 //global variables
 //---------------------------
-unsigned char pattern[5] = {0x00, 0x81, 0xC1, 0x81, 0x00}; //ball will start on the left middle going to the right
+//unsigned char pattern[5] = {0x00, 0x81, 0xC1, 0x81, 0x00}; //ball will start on the left middle going to the right
 unsigned char row[5] = {0xFE, 0xFD, 0xFB, 0xF7, 0xEF}; 
 unsigned char update = 0;
-unsigned char P1POS; //get position of paddle's highest bit by pattern index
+unsigned char P1POS = 1; //get position of paddle's highest bit by pattern index
 unsigned char P2AIPOS = 1; //this will get the higher part of the 3 bits position by it's pattern index
 unsigned char P1UP; //A0
 unsigned char P1DOWN; //A1
@@ -31,25 +31,17 @@ unsigned char P2DOWN; //A3 later
 unsigned char reset;  //A7 later
 unsigned char ballspeed; //later
 unsigned char spin; //later for if the paddle moves when hitting ball
-unsigned char currbit; //Which bit in the pattern is the ball
-unsigned char currrow; //which row the ball is in
+unsigned char currbit = 6; //Which bit in the pattern is the ball
+unsigned char currrow = 2; //which row the ball is in
 unsigned char score; //later on
 unsigned char gamemode; //later on for single or multi
-int direction;
+int direction = 2; 
+//1 is straightleft, 2 straightright, 3upright, 4 downright, 5 upleft, 6 downleft
 //---------------------------
 //declaring functions
 //---------------------------
 void transmit_data(unsigned char data, unsigned char reg);
 void moveball(int direction);
-unsigned char SetBit(unsigned char x, unsigned char k, unsigned char b);
-unsigned char GetBit(unsigned char x, unsigned char k);
-bool checkcenter(int centerbit); //these are to check which part of the paddle the ball hits
-bool checktop(int topbit); 
-bool checkbot(int botbit);
-void paddleup(int player);
-void paddledown(int player);
-bool checkfirst();//this checks for the top row, so if it hits top row it bounces off
-bool checklast();//this checks for bottom row, so if it hits the bottom row it bounces off
 //--------------------------
 //declaring SMs and SM functions
 //--------------------------
@@ -101,76 +93,81 @@ void transmit_data(unsigned char data, unsigned char reg) {
     }
 }
 
-//void moveball(int direction);
-
-unsigned char SetBit(unsigned char x, unsigned char k, unsigned char b){
-	return(b ? (x | (0x01 << k)) : (x & ~(0x01 << k)) );
-}
-
-unsigned char GetBit(unsigned char x, unsigned char k){
-	return ((x & (0x01 << k)) != 0);
-}
-
-//bool checkcenter(int centerbit);
-//bool checktop(int topbit); 
-//bool checkbot(int botbit);
-
-void paddleup(int player){
-	//clear & replace the paddle
-	if(player == 1){
-		//clear p1 paddle
-		for(int i = 0; i < 5; ++i){
-			pattern[i] = SetBit(pattern[i], 0, 0);	
-		}
-		//set p1 paddle
-		pattern[P1POS - 1] = SetBit(pattern[P1POS - 1], 0, 1);
-		pattern[P1POS] = SetBit(pattern[P1POS], 0, 1);
-		pattern[P1POS + 1] = SetBit(pattern[P1POS + 1], 0, 1);
+void moveball(int direction){
+	if(direction == 1){//straightleft
+		--currbit;
 	}
-	if(player == 2){
-		//clear p2 paddle
-		for(int i = 0; i < 5; ++i){
-			pattern[i] = SetBit(pattern[i], 7, 0);	
-		}
-		//set p2 paddle
-		pattern[P2AIPOS - 1] = SetBit(pattern[P2AIPOS - 1], 7, 1);
-		pattern[P2AIPOS] = SetBit(pattern[P2AIPOS], 7, 1);
-		pattern[P2AIPOS + 1] = SetBit(pattern[P2AIPOS + 1], 7, 1);
-	}	
-}
-
-void paddledown(int player){
-	//Clear & replace paddle
-	if(player == 1){
-		//clear p1 paddle
-		for(int i = 0; i < 5; ++i){
-			pattern[i] = SetBit(pattern[i], 0, 0);	
-		}
-		//set p1 paddle
-		pattern[P1POS + 1] = SetBit(pattern[P1POS + 1], 0, 1);
-		pattern[P1POS + 2] = SetBit(pattern[P1POS + 2], 0, 1);
-		pattern[P1POS + 3] = SetBit(pattern[P1POS + 3], 0, 1);
+	if(direction == 2){//straightright
+		++currbit;
 	}
-	if(player == 2){
-		//clear p2 paddle
-		for(int i = 0; i < 5; ++i){
-			pattern[i] = SetBit(pattern[i], 7, 0);	
-		}
-		//set p2 paddle
-		pattern[P2AIPOS + 1] = SetBit(pattern[P2AIPOS + 1], 7, 1);
-		pattern[P2AIPOS + 2] = SetBit(pattern[P2AIPOS + 2], 7, 1);
-		pattern[P2AIPOS + 3] = SetBit(pattern[P2AIPOS + 3], 7, 1);
+	if(direction == 3){//upright
+		++currbit;
+		--currrow;
+	}
+	if(direction == 4){//downright
+		++currbit;
+		++currow;
+	}
+	if(direction == 5){//upleft
+		--currbit;
+		--currow;
+	}
+	if(direction == 6){//downleft
+		--currbit;
+		++currow;
 	}
 }
 
-//bool checkfirst();
-//bool checklast();
 
 int Ball_Tick(int Ball_State){
 	switch(Ball_State){
 		case ballposition:
-			currbit = 6;
-			currrow = 2;
+			if(currow == 0){
+				if((currbit != 0) && (currbit != 6)){
+				if(direction == 3){ direction = 4;}
+				if(direction == 5){ direction = 6;}
+				}
+			}
+			else if(currow == 4){
+				if((currbit != 0) && (currbit != 6)){ 
+				if(direction == 4){ direction = 3;}
+				if(direction == 6){ direction = 5;}
+				}
+			}
+			if(currbit == 1){
+				if(currow == P1POS + 1){//P1POS + 1 is the center of paddle1
+					direction = 1;	
+				}
+				if(currow == P1POS){//P1POS is the top corner
+					if(P1POS == 0){//if the paddle is in the corner, it cant bounce up so itll bounce down
+						direction = 6;
+					}
+					else{ direction = 5; }
+				}
+				if(currow == P1POS + 2){ //bottom corner paddle 1
+					if(P1POS == 2){//if the paddle is in the bottom corner, it cant bounce down so itll bounce up
+						direction = 5;
+					}
+					else{ direction = 6; }	
+				}
+			}
+			if(currbit == 6){
+				if(currow == P2AIPOS + 1){//same things as above but for paddle2
+					direction = 2;
+				}
+				if(currow == P2AIPOS){
+					if(P2AIPOS == 0){//Same situation as above
+						direction = 4;
+					}
+					else{ direction = 3; }
+				}
+				if(currow == P2PAIPOS + 2){//^^
+					if(P2AIPOS == 2){
+						direction = 3;
+					}
+					else{ direction = 4; }
+				}
+			moveball(direction);						
 			Ball_State = ballposition;
 			break;
 		default: Ball_State = ballposition;
@@ -180,21 +177,8 @@ int Ball_Tick(int Ball_State){
 
 
 int Player1_Tick(int Player1_State){
-	unsigned char got1 = 0; //for when position is determined
 	switch(Player1_State){	
-		case paddle1:
-			//small segment to set P1POS
-			for(int i = 0; i < 5; ++i){
-				if(got1 == 1){
-					//do nothing, position found
-				}
-				else if(GetBit(pattern[i],0)){
-					P1POS = i;
-					got1 = 1;
-				}
-			}
-			got1 = 0;	
-				
+		case paddle1:	
 			
 			if(!P1UP && !P1DOWN){
 				//no movement
@@ -209,7 +193,7 @@ int Player1_Tick(int Player1_State){
 				}
 				else{
 					//move paddle up
-					paddleup(1);
+					P1POS = P1POS - 1;
 				}
 			}
 			else if(P1DOWN){
@@ -219,7 +203,7 @@ int Player1_Tick(int Player1_State){
 				}
 				else{
 					//move paddle1 down
-					paddledown(1);
+					P1POS = P1POS + 1;
 				}
 			}
 			break;
@@ -229,7 +213,6 @@ int Player1_Tick(int Player1_State){
 }
 
 int Player2_Tick(int Player2_State){
-	unsigned char got2 = 0;
 //	P2AIPOS = 1;
 	switch(Player2_State){
 		case P2active:
