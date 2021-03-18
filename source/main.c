@@ -299,7 +299,7 @@ int Player1_Tick(int Player1_State){
 int Player2_Tick(int Player2_State){
 	switch(Player2_State){
 		case waitingformenu:
-			if(gamemode != 0){
+			if((gamemode != 0) && (game == 1)){
 				Player2_State = P2movement;
 			}
 			else{
@@ -401,6 +401,7 @@ int Menu_Tick(int Menu_State){
 				Menu_State = resetsetup;
 			}
 			else if((currbit <= 0) || (currbit >= 7)){
+				game = 0;
 				Menu_State = counting;
 			}
 			else{
@@ -431,6 +432,7 @@ int Display_Tick(int Display_State){
 	switch(Display_State){
 		//i have an idea so im going to ignore the computer paddle and the ball for now
 		case display:
+		if(game && !gameend){
 			if((update >= 0) && (update < 3)){
 				transmit_data(0x01, 1);
 			}
@@ -458,7 +460,12 @@ int Display_Tick(int Display_State){
 		  	if((update == 6) && game){
 				transmit_data((1 << currbit), 1);
 				transmit_data(row[currow], 2);
-			}	
+			}
+		}
+		if(gameend || !game){
+			transmit_data(0,1);
+			transmit_data(0xFF,2);
+		}
 			Display_State = delay;
 			break;
 		case delay:
