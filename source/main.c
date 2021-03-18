@@ -12,6 +12,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 #ifdef _SIMULATE_
 #include "simAVRHeader.h"
 #include "scheduler.h"
@@ -30,7 +31,7 @@ unsigned char P1DOWN; //A1
 unsigned char P2UP;   //A2 later
 unsigned char P2DOWN; //A3 later
 unsigned char reset;  //A7 later
-unsigned char ballspeed; //later
+unsigned char ballspeed = 300; //base
 unsigned char spin; //later for if the paddle moves when hitting ball
 unsigned char currbit = 6; //Which bit in the pattern is the ball
 unsigned char currow = 2; //which row the ball is in
@@ -140,36 +141,48 @@ int Ball_Tick(int Ball_State){
 			}
 			if(currbit == 1){
 				if(currow == P1POS + 1){//P1POS + 1 is the center of paddle1
-					direction = 1;	
+					direction = 1;
+					ballspeed += 50;
+					if(ballspeed >= 300){ ballspeed = 300; }	
 				}
 				if(currow == P1POS){//P1POS is the top corner
 					if(P1POS == 0){//if the paddle is in the corner, it cant bounce up so itll bounce down
-						direction = 6;
+						direction = 6;	
 					}
 					else{ direction = 5; }
+					ballspeed -= 50;
+					if(ballspeed <= 100) { ballspeed = 100; }
 				}
 				if(currow == P1POS + 2){ //bottom corner paddle 1
 					if(P1POS == 2){//if the paddle is in the bottom corner, it cant bounce down so itll bounce up
 						direction = 5;
 					}
-					else{ direction = 6; }	
+					else{ direction = 6; }
+					ballspeed -= 50;
+					if(ballspeed <= 100){ ballspeed = 100; }	
 				}
 			}
 			if(currbit == 6){
 				if(currow == P2AIPOS + 1){//same things as above but for paddle2
 					direction = 2;
+					ballspeed += 50;
+					if(ballspeed >=300){ ballspeed = 300; }
 				}
 				if(currow == P2AIPOS){
 					if(P2AIPOS == 0){//Same situation as above
 						direction = 4;
 					}
 					else{ direction = 3; }
+					ballspeed -= 50;
+					if(ballspeed <= 100){ ballspeed = 100;}
 				}
 				if(currow == P2AIPOS + 2){//^^
 					if(P2AIPOS == 2){
 						direction = 3;
 					}
 					else{ direction = 4; }
+					ballspeed -= 50;
+					if(ballspeed <= 100){ballspeed = 100;}
 				}
 			}
 			moveball(direction);						
@@ -222,10 +235,8 @@ int Player2_Tick(int Player2_State){
 			Player2_State = P2active;
 			break;
 		case P2off: //if the P2 is off, it means the AI is on
-			if((rand() % 3) == 1){
+			if((rand() % 2) == 1){
 				//I want it to not be too hard to beat the AI because the matrix is so small
-				//so it will react only when the ball is at bits from 1-4
-				if((currbit == 1) || (currbit == 2) || (currbit == 3) || (currbit == 4)){
 					if(currow < P2AIPOS){
 						if(P2AIPOS == 0){ 
 							//do nothing
@@ -238,7 +249,7 @@ int Player2_Tick(int Player2_State){
 						}
 						else{ ++P2AIPOS; }
 					}
-				}
+				
 			}
 			Player2_State = P2off;
 			break;
@@ -356,9 +367,11 @@ int main(void) {
 
     TimerSet(1);
     TimerOn();
+    srand((int)time(0));
     
     while (1) {
 
+	    task1.period = ballspeed;
 	    P1UP = ~PINA & 0x01;
 	    P1DOWN = ~PINA & 0x02;
 	    PORTB = P1UP;
