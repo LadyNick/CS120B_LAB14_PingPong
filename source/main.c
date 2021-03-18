@@ -28,7 +28,7 @@ unsigned char P1POS = 1; //get position of paddle's highest bit by pattern index
 unsigned char P2AIPOS = 1; //this will get the higher part of the 3 bits position by it's pattern index
 unsigned char P1UP; //A0
 unsigned char P1DOWN; //A1
-unsigned char P2;
+unsigned char P2 = 0;
 unsigned char reset;  //A7 later
 unsigned char P1MOVE = 0; //these will track whether or not the paddles are moving or just static
 unsigned char P2MOVE = 0;
@@ -38,14 +38,14 @@ unsigned short ballspeed = 300; //base speed
 unsigned char spin; //later for if the paddle moves when hitting ball
 unsigned char currbit = 6; //Which bit in the pattern is the ball
 unsigned char currow = 2; //which row the ball is in
-unsigned char scoreP1 = 0;
-unsigned char scoreP2 = 0;
+unsigned char P1score = 0;
+unsigned char P2score = 0;
 unsigned char gamemode = 0; //later on for single or multi
 unsigned char donedisplay = 1; //later for advancement 4
 int direction = 2; 
 unsigned char Single;
 unsigned char Double;
-unsigned char game = 1; //this is to determine when the ball is allowed to move and when its not
+unsigned char game = 0; //this is to determine when the ball is allowed to move and when its not
 unsigned char gameend = 0; //this is for when the whole game is over to display who won
 //1 is straightleft, 2 straightright, 3upright, 4 downright, 5 upleft, 6 downleft
 //---------------------------
@@ -66,9 +66,9 @@ enum Display_States{display, delay, clear}Display_State;
 int Display_Tick(int Display_State);
 enum AI_States{AIoff, AIactive}AI_State;
 int AI_Tick(int AI_State);
-enum Player2_States{P2off, P2active}Player2_State;
+enum Player2_States{waitingformenu, P2movement}Player2_State;
 int Player2_Tick(int Player2_State);
-enum Menu_States{waiting}Menu_State;
+enum Menu_States{choose,counting, ingame, resetsetup, gameover}Menu_State;
 int Menu_Tick(int Menu_State);
 //--------------------------
 
@@ -307,7 +307,7 @@ int Player2_Tick(int Player2_State){
 			}
 			break;
 		case P2movement: //if the P2 is off, it means the AI is on, option1 == AI option 2 == 2 player
-			if(option == 1){
+			if(gamemode == 1){
 			if((rand() % 2) == 1){
 				//I want it to not be too hard to beat the AI because the matrix is so small
 					if(currow < P2AIPOS){
@@ -342,7 +342,7 @@ int Player2_Tick(int Player2_State){
 				Player2_State = P2movement;
 			}
 			break;
-		default: Player2_State = P2off; break;
+		default: Player2_State = P2movement; break;
 	}
 	return Player2_State;
 }
@@ -376,7 +376,7 @@ int Menu_Tick(int Menu_State){
 				currow = 2;
 				direction = 2;
 				ballspeed = 300;
-				counting = 0;
+				count = 0;
 			}
 			else{
 				Menu_State = counting;
@@ -536,14 +536,14 @@ int main(void) {
     
     while (1) {
 	    Set_A2D_Pin(0);
-	    P2AI = ADC;
+	    P2 = ADC;
 	    task1.period = ballspeed;
 	    task5.period = ballspeed;
 	    P1UP = ~PINA & 0x04;
 	    P1DOWN = ~PINA & 0x08;
 	    reset = ~PINA & 0x10;
 	    Single = ~PINA & 0x20;
-	    Double = ~PINA & 040;
+	    Double = ~PINA & 0x40;
 	    
 	    for(int i=0; i<numTasks; i++){ //Scheduler code
 			if(tasks[i]->elapsedTime >= tasks[i]->period){
