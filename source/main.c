@@ -32,6 +32,7 @@ unsigned char P2 = 0;
 unsigned char reset;  //A7 later
 unsigned char P1MOVE = 0; //these will track whether or not the paddles are moving or just static
 unsigned char P2MOVE = 0;
+unsigned short count = 0;
 bool P2SPIN = false; //this is for activating the spin features
 bool P1SPIN = false;
 unsigned short ballspeed = 300; //base speed
@@ -326,7 +327,7 @@ int Player1_Tick(int Player1_State){
 int Player2_Tick(int Player2_State){
 	switch(Player2_State){
 		case waitingformenu:
-			if((gamemode != 0) && (game == 1)){
+			if(!gameend && (game == 1)){
 				Player2_State = P2movement;
 			}
 			else{
@@ -375,19 +376,16 @@ int Player2_Tick(int Player2_State){
 }
 
 int Menu_Tick(int Menu_State){
-	unsigned char count = 0;
-	
 	switch(Menu_State){
 		case choose:
 			game = 0;
 			gameend = 1;
 			if(Single){
 				gamemode = 1;
+				Menu_State = counting;
 			}
-			if(Double){
+			else if(Double){
 				gamemode = 2;
-			}
-			if(gamemode != 0){
 				Menu_State = counting;
 			}
 			else{
@@ -395,7 +393,6 @@ int Menu_Tick(int Menu_State){
 			}
 			break;
 		case counting:
-			//since this sm matches the ball speed, we will count up to 3000 ms for 3 seconds before every round start
 			count += ballspeed;
 			if(count >= 3000){
 				Menu_State = ingame;
@@ -406,6 +403,7 @@ int Menu_Tick(int Menu_State){
 				direction = 2;
 				ballspeed = 300;
 				count = 0;
+				gameend = 0;
 				game = 1;
 			}
 			else{
@@ -446,6 +444,13 @@ int Menu_Tick(int Menu_State){
 			}
 			break;
 		case resetsetup:
+			P1score = 0;
+                        P2score = 0;
+                        game = 0;
+                        gameend = 1;
+			ballspeed = 300;
+			P1POS = 1;
+			P2AIPOS = 1;
 			Menu_State = choose;
 			break;
 		case gameover:
@@ -465,7 +470,6 @@ int Display_Tick(int Display_State){
 	switch(Display_State){
 		//i have an idea so im going to ignore the computer paddle and the ball for now
 		case display:
-		if(!gameend && game){
 			if((update >= 0) && (update < 3)){
 				transmit_data(0x01, 1);
 			}
@@ -490,21 +494,17 @@ int Display_Tick(int Display_State){
 			if(update == 5){
 				transmit_data(row[P2AIPOS + 2], 2);
 			}	 
-		  	if((update == 6)){
+		  	if((update == 6) && game){
 				transmit_data((1 << currbit), 1);
 				transmit_data(row[currow], 2);
 			}
-			/*if((update == 6) && !game && !gameend){
+			if((update == 6) && !game){
 				transmit_data(1 << 6, 1);
 				transmit_data(row[2],2);
-			}*/
-			PORTB = (P1score << 5) + P2score;
-		}
-		else if(!gameend && !game){
-			transmit_data(0,1);
-			transmit_data(0xFF,2);
-		}
+			}
+			PORTB = (P2score << 3) + P1score;
 			Display_State = delay;
+		//	PORTB = (((gameend << 1) + game) << 1) + (Single >> 5);
 			break;
 		case delay:
 			++update;
