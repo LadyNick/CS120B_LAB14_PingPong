@@ -112,18 +112,30 @@ void moveball(int direction){
 	if(direction == 3){//upright
 		--currbit;
 		--currow;
+		if(P2SPIN){
+			--currow;	
+		}
 	}
 	if(direction == 4){//downright
 		--currbit;
 		++currow;
+		if(P2SPIN){
+			++currow;
+		}
 	}
 	if(direction == 5){//upleft
 		++currbit;
 		--currow;
+		if(P1SPIN){
+			--currow;
+		}
 	}
 	if(direction == 6){//downleft
 		++currbit;
 		++currow;
+		if(P1SPIN){
+			--currow;
+		}
 	}
 }
 
@@ -145,6 +157,10 @@ int Ball_Tick(int Ball_State){
 			}
 			if(currbit == 1){
 				P2SPIN = false; // spin from left to right reset
+				if(P1MOVE == 1 ){
+					if((P1POS == 0) || (P1POS == 2)){ 
+					P1SPIN = true; 
+					}
 				if(currow == P1POS + 1){//P1POS + 1 is the center of paddle1
 					direction = 1;
 					ballspeed += 50;
@@ -155,32 +171,44 @@ int Ball_Tick(int Ball_State){
 						direction = 6;	
 					}
 					else{ direction = 5; }
+					if(P1SPIN == false){ //if the spis is true I don't want it to go too fast because the matrix is small
 					ballspeed -= 50;
 					if(ballspeed <= 100) { ballspeed = 100; }
+					}
 				}
 				if(currow == P1POS + 2){ //bottom corner paddle 1
 					if(P1POS == 2){//if the paddle is in the bottom corner, it cant bounce down so itll bounce up
 						direction = 5;
 					}
 					else{ direction = 6; }
+					if(P1SPIN == false{ // ^^
 					ballspeed -= 50;
-					if(ballspeed <= 100){ ballspeed = 100; }	
+					if(ballspeed <= 100){ ballspeed = 100; }
+					}
 				}
 			}
 			if(currbit == 6){
 				P1SPIN = false; //reset spin from right to left
+				if(P2MOVE == 1){ 
+					if((P2AIPOS == 0) || (P2AIPOS == 2){
+						P2SPIN = true; 
+					}
 				if(currow == P2AIPOS + 1){//same things as above but for paddle2
 					direction = 2;
+					if(P2SPIN == false){
 					ballspeed += 50;
 					if(ballspeed >=300){ ballspeed = 300; }
+					}
 				}
 				if(currow == P2AIPOS){
 					if(P2AIPOS == 0){//Same situation as above
 						direction = 4;
 					}
 					else{ direction = 3; }
+					if(P2SPIN == false){
 					ballspeed -= 50;
 					if(ballspeed <= 100){ ballspeed = 100;}
+					}
 				}
 				if(currow == P2AIPOS + 2){//^^
 					if(P2AIPOS == 2){
