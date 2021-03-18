@@ -46,7 +46,7 @@ int direction = 2;
 unsigned char Single;
 unsigned char Double;
 unsigned char game = 0; //this is to determine when the ball is allowed to move and when its not
-unsigned char gameend = 0; //this is for when the whole game is over to display who won
+unsigned char gameend = 1; //this is for when the whole game is over to display who won
 //1 is straightleft, 2 straightright, 3upright, 4 downright, 5 upleft, 6 downleft
 //---------------------------
 //declaring functions
@@ -380,6 +380,7 @@ int Menu_Tick(int Menu_State){
 	switch(Menu_State){
 		case choose:
 			game = 0;
+			gameend = 1;
 			if(Single){
 				gamemode = 1;
 			}
@@ -405,6 +406,7 @@ int Menu_Tick(int Menu_State){
 				direction = 2;
 				ballspeed = 300;
 				count = 0;
+				game = 1;
 			}
 			else{
 				Menu_State = counting;
@@ -423,9 +425,16 @@ int Menu_Tick(int Menu_State){
 				}
 			}
 			if((P1score == 5) || (P2score == 5)){
+				gameend = 1;
+				gamemode = 0;
+				game = 0;
 				Menu_State = gameover;
 			}
 			else if(reset){
+				P1score = 0;
+				P2score = 0;
+				game = 0;
+				gameend = 1;
 				Menu_State = resetsetup;
 			}
 			else if((currbit <= 0) || (currbit >= 7)){
@@ -437,13 +446,9 @@ int Menu_Tick(int Menu_State){
 			}
 			break;
 		case resetsetup:
-			P1score = 0;
-			P2score = 0;
 			Menu_State = choose;
 			break;
 		case gameover:
-			gameend = 1;
-			gamemode = 0;
 			if(donedisplay){ //this ill change in advancement 4
 				Menu_State = resetsetup;	
 			}
@@ -460,7 +465,7 @@ int Display_Tick(int Display_State){
 	switch(Display_State){
 		//i have an idea so im going to ignore the computer paddle and the ball for now
 		case display:
-		if(!gameend){
+		if(!gameend && game){
 			if((update >= 0) && (update < 3)){
 				transmit_data(0x01, 1);
 			}
@@ -495,7 +500,7 @@ int Display_Tick(int Display_State){
 			}*/
 			PORTB = (P1score << 5) + P2score;
 		}
-		else if(gameend){
+		else if(!gameend && !game){
 			transmit_data(0,1);
 			transmit_data(0xFF,2);
 		}
