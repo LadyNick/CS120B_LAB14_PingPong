@@ -28,8 +28,7 @@ unsigned char P1POS = 1; //get position of paddle's highest bit by pattern index
 unsigned char P2AIPOS = 1; //this will get the higher part of the 3 bits position by it's pattern index
 unsigned char P1UP; //A0
 unsigned char P1DOWN; //A1
-unsigned char P2UP;   //A2 later
-unsigned char P2DOWN; //A3 later
+unsigned char P2;
 unsigned char reset;  //A7 later
 unsigned char P1MOVE = 0; //these will track whether or not the paddles are moving or just static
 unsigned char P2MOVE = 0;
@@ -39,10 +38,15 @@ unsigned short ballspeed = 300; //base speed
 unsigned char spin; //later for if the paddle moves when hitting ball
 unsigned char currbit = 6; //Which bit in the pattern is the ball
 unsigned char currow = 2; //which row the ball is in
-unsigned char score; //later on
-unsigned char gamemode; //later on for single or multi
+unsigned char scoreP1 = 0;
+unsigned char scoreP2 = 0;
+unsigned char gamemode = 0; //later on for single or multi
+unsigned char donedisplay = 1; //later for advancement 4
 int direction = 2; 
-unsigned char game = 1;
+unsigned char Single;
+unsigned char Double;
+unsigned char game = 1; //this is to determine when the ball is allowed to move and when its not
+unsigned char gameend = 0; //this is for when the whole game is over to display who won
 //1 is straightleft, 2 straightright, 3upright, 4 downright, 5 upleft, 6 downleft
 //---------------------------
 //declaring functions
@@ -294,10 +298,16 @@ int Player1_Tick(int Player1_State){
 
 int Player2_Tick(int Player2_State){
 	switch(Player2_State){
-		case P2active:
-			Player2_State = P2active;
+		case waitingformenu:
+			if(gamemode != 0){
+				Player2_State = P2movement;
+			}
+			else{
+				Player2_State = waitingformenu;
+			}
 			break;
-		case P2off: //if the P2 is off, it means the AI is on
+		case P2movement: //if the P2 is off, it means the AI is on, option1 == AI option 2 == 2 player
+			if(option == 1){
 			if((rand() % 2) == 1){
 				//I want it to not be too hard to beat the AI because the matrix is so small
 					if(currow < P2AIPOS){
@@ -321,8 +331,16 @@ int Player2_Tick(int Player2_State){
 						    }
 					}
 				
+			} }
+			if(gamemode == 2){ //here goes P2 movements with double player
+				
 			}
-			Player2_State = P2off;
+			if(gameend == 1){
+				Player2_State = waitingformenu;
+			}
+			else{
+				Player2_State = P2movement;
+			}
 			break;
 		default: Player2_State = P2off; break;
 	}
@@ -330,13 +348,81 @@ int Player2_Tick(int Player2_State){
 }
 
 int Menu_Tick(int Menu_State){
+	unsigned char count = 0;
+	
 	switch(Menu_State){
-		case waiting:
-			if((currbit == 0) || (currbit == 7)){
-				game = 0;
+		case choose:
+			if(Single){
+				gamemode = 1;
 			}
-			Menu_State = waiting; break;
-		default: Menu_State = waiting; break;
+			if(Double){
+				gamemode = 2;
+			}
+			if(gamemode != 0){
+				Menu_State = counting;
+			}
+			else{
+				Menu_State = choose;
+			}
+			break;
+		case counting:
+			//since this sm matches the ball speed, we will count up to 3000 ms for 3 seconds before every round start
+			count += ballspeed;
+			if(count >= 3000){
+				Menu_State = ingame;
+				P2AIPOS = 1;
+				P1POS = 1;
+				currbit = 1;
+				currow = 2;
+				direction = 2;
+				ballspeed = 300;
+				counting = 0;
+			}
+			else{
+				Menu_State = counting;
+			}
+			break;
+		case ingame:
+			gameend = 0;
+			game = 1;
+			if((currbit <= 0) || (currbit >= 7)){
+				game = 0;
+				if(currbit <= 0){
+					++P2score;
+				}
+				if(currbit >= 7){
+					++P1score;
+				}
+			}
+			if((P1score == 5) || (P2score == 5)){
+				Menu_State = gameover;
+			}
+			else if(reset){
+				Menu_State = resetsetup;
+			}
+			else if((currbit <= 0) || (currbit >= 7)){
+				Menu_State = counting;
+			}
+			else{
+				Menu_State = ingame;
+			}
+			break;
+		case resetsetup:
+			P1score = 0;
+			P2score = 0;
+			Menu_State = choose;
+			break;
+		case gameover:
+			gameend = 1;
+			gamemode = 0;
+			if(donedisplay){ //this ill change in advancement 4
+				Menu_State = resetsetup;	
+			}
+			else{
+				Menu_State = gameover;
+			}
+			break;
+		default: Menu_State = choose; break;
 	}
 	return Menu_State;
 }
@@ -432,7 +518,7 @@ int main(void) {
 
     //MENU
     task5.state = start;
-    task5.period = 300; //to match ball speed
+    task5.period = ballspeed; //to match ball speed
     task5.elapsedTime = task5.period;
     task5.TickFct = &Menu_Tick;
 
@@ -442,12 +528,15 @@ int main(void) {
     srand((int)time(0));
     
     while (1) {
-	    Set_A2D_Pin(1);
+	    Set_A2D_Pin(0);
 	    P2AI = ADC;
 	    task1.period = ballspeed;
+	    task5.period = ballspeed;
 	    P1UP = ~PINA & 0x04;
 	    P1DOWN = ~PINA & 0x08;
-	    reset = ~PINA & 0x80;
+	    reset = ~PINA & 0x10;
+	    Single = ~PINA & 0x20;
+	    Double = ~PINA & 040;
 	    
 	    for(int i=0; i<numTasks; i++){ //Scheduler code
 			if(tasks[i]->elapsedTime >= tasks[i]->period){
