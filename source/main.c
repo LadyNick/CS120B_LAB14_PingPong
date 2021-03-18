@@ -48,6 +48,8 @@ unsigned char game = 1;
 //declaring functions
 //---------------------------
 void transmit_data(unsigned char data, unsigned char reg);
+void A2D_init();
+void Set_A2D_Pin(unsigned char pinNum);
 void moveball(int direction);
 //--------------------------
 //declaring SMs and SM functions
@@ -100,6 +102,28 @@ void transmit_data(unsigned char data, unsigned char reg) {
         // set RCLK = 1. 
         PORTD |= 0x04;
     }
+}
+
+void A2D_init() {
+      ADCSRA |= (1 << ADEN) | (1 << ADSC) | (1 << ADATE);
+	// ADEN: Enables analog-to-digital conversion
+	// ADSC: Starts analog-to-digital conversion
+	// ADATE: Enables auto-triggering, allowing for constant
+	//	    analog to digital conversions.
+}
+
+// Pins on PORTA are used as input for A2D conversion
+	//    The default channel is 0 (PA0)
+	// The value of pinNum determines the pin on PORTA
+	//    used for A2D conversion
+	// Valid values range between 0 and 7, where the value
+	//    represents the desired pin for A2D conversion
+
+void Set_A2D_Pin(unsigned char pinNum) {
+ADMUX = (pinNum <= 0x07) ? pinNum : ADMUX;
+// Allow channel to stabilize
+static unsigned char i = 0;
+for ( i=0; i<15; i++ ) { asm("nop"); }
 }
 
 void moveball(int direction){
@@ -412,19 +436,18 @@ int main(void) {
     task5.elapsedTime = task5.period;
     task5.TickFct = &Menu_Tick;
 
+    A2D_init();
     TimerSet(1);
     TimerOn();
     srand((int)time(0));
     
     while (1) {
-
+	    Set_A2D_Pin(1);
+	    P2AI = ADC;
 	    task1.period = ballspeed;
-	    P1UP = ~PINA & 0x01;
-	    P1DOWN = ~PINA & 0x02;
-	    PORTB = P1UP;
-	   // P2UP P2 will use the keypad
-	   // P2DOWN 
-	   // reset = ~PINA & 0x80;
+	    P1UP = ~PINA & 0x04;
+	    P1DOWN = ~PINA & 0x08;
+	    reset = ~PINA & 0x80;
 	    
 	    for(int i=0; i<numTasks; i++){ //Scheduler code
 			if(tasks[i]->elapsedTime >= tasks[i]->period){
