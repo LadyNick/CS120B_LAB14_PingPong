@@ -31,7 +31,11 @@ unsigned char P1DOWN; //A1
 unsigned char P2UP;   //A2 later
 unsigned char P2DOWN; //A3 later
 unsigned char reset;  //A7 later
-unsigned short ballspeed = 300; //base
+unsigned char P1MOVE = 0; //these will track whether or not the paddles are moving or just static
+unsigned char P2MOVE = 0;
+bool P2SPIN = false; //this is for activating the spin features
+bool P1SPIN = false;
+unsigned short ballspeed = 300; //base speed
 unsigned char spin; //later for if the paddle moves when hitting ball
 unsigned char currbit = 6; //Which bit in the pattern is the ball
 unsigned char currow = 2; //which row the ball is in
@@ -140,6 +144,7 @@ int Ball_Tick(int Ball_State){
 				}
 			}
 			if(currbit == 1){
+				P2SPIN = false; // spin from left to right reset
 				if(currow == P1POS + 1){//P1POS + 1 is the center of paddle1
 					direction = 1;
 					ballspeed += 50;
@@ -163,6 +168,7 @@ int Ball_Tick(int Ball_State){
 				}
 			}
 			if(currbit == 6){
+				P1SPIN = false; //reset spin from right to left
 				if(currow == P2AIPOS + 1){//same things as above but for paddle2
 					direction = 2;
 					ballspeed += 50;
@@ -199,9 +205,11 @@ int Player1_Tick(int Player1_State){
 		case paddle1:	
 			if(!P1UP && !P1DOWN){
 				//no movement
+				P1MOVE = 0;
 			}
 			else if(P1UP && P1DOWN){
 				//no movement
+				P1MOVE = 0;
 			}
 			else if(P1UP){
 				//move the paddle up by 1, but check if its already at the max
@@ -210,6 +218,7 @@ int Player1_Tick(int Player1_State){
 				}
 				else{
 					//move paddle up
+					P1MOVE = 1;
 					P1POS = P1POS - 1;
 				}
 			}
@@ -220,6 +229,7 @@ int Player1_Tick(int Player1_State){
 				}
 				else{
 					//move paddle1 down
+					P1MOVE = 1;
 					P1POS = P1POS + 1;
 				}
 			}
@@ -240,14 +250,22 @@ int Player2_Tick(int Player2_State){
 					if(currow < P2AIPOS){
 						if(P2AIPOS == 0){ 
 							//do nothing
+							P2MOVE = 0;
 						}
-						else{ --P2AIPOS; }		
+						else{ 
+							--P2AIPOS;
+							P2MOVE = 1;
+						    }		
 					}
 					if(currow > P2AIPOS){
 						if(P2AIPOS == 2){
 							//do nothing
+							P2MOVE = 0;
 						}
-						else{ ++P2AIPOS; }
+						else{ 
+							++P2AIPOS; 
+						    	P2MOVE = 1;
+						    }
 					}
 				
 			}
