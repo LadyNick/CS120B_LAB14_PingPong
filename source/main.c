@@ -58,7 +58,7 @@ void moveball(int direction);
 //--------------------------
 //declaring SMs and SM functions
 //--------------------------
-enum Ball_States{ballposition}Ball_State;
+enum Ball_States{ballwait, ballposition}Ball_State;
 int Ball_Tick(int Ball_State);
 enum Player1_States{waitingtostart,paddle1}Player1_State;
 int Player1_Tick(int Player1_State);
@@ -170,7 +170,19 @@ void moveball(int direction){
 
 int Ball_Tick(int Ball_State){
 	switch(Ball_State){
+		case ballwait:
+			if(game && !gameend){
+				Ball_State = ballposition;
+			}
+			else{
+				Ball_State = ballwait;
+			}
+			break;
 		case ballposition:
+			if(gameend || !game){
+                                Ball_State = ballwait;
+                        }
+                        else{
 			if(currow == 0){
 				if((currbit != 1) && (currbit != 6)){
 				if(direction == 3){ direction = 4;}
@@ -248,10 +260,11 @@ int Ball_Tick(int Ball_State){
 					if(ballspeed <= 100){ballspeed = 100;}
 				}
 			}
-			moveball(direction);						
+			moveball(direction);
 			Ball_State = ballposition;
+			}
 			break;
-		default: Ball_State = ballposition;
+		default: Ball_State = ballwait;
 	}
 	return Ball_State;
 }
@@ -366,6 +379,7 @@ int Menu_Tick(int Menu_State){
 	
 	switch(Menu_State){
 		case choose:
+			game = 0;
 			if(Single){
 				gamemode = 1;
 			}
@@ -386,7 +400,7 @@ int Menu_Tick(int Menu_State){
 				Menu_State = ingame;
 				P2AIPOS = 1;
 				P1POS = 1;
-				currbit = 1;
+				currbit = 6;
 				currow = 2;
 				direction = 2;
 				ballspeed = 300;
@@ -446,7 +460,7 @@ int Display_Tick(int Display_State){
 	switch(Display_State){
 		//i have an idea so im going to ignore the computer paddle and the ball for now
 		case display:
-		if(game && !gameend){
+		if(!gameend){
 			if((update >= 0) && (update < 3)){
 				transmit_data(0x01, 1);
 			}
@@ -471,13 +485,17 @@ int Display_Tick(int Display_State){
 			if(update == 5){
 				transmit_data(row[P2AIPOS + 2], 2);
 			}	 
-		  	if((update == 6) && game){
+		  	if((update == 6)){
 				transmit_data((1 << currbit), 1);
 				transmit_data(row[currow], 2);
 			}
-			PORTB = (P1Score << 5) + P2score;
+			/*if((update == 6) && !game && !gameend){
+				transmit_data(1 << 6, 1);
+				transmit_data(row[2],2);
+			}*/
+			PORTB = (P1score << 5) + P2score;
 		}
-		if(gameend || !game){
+		else if(gameend){
 			transmit_data(0,1);
 			transmit_data(0xFF,2);
 		}
