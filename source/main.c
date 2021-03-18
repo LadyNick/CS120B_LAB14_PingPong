@@ -60,7 +60,7 @@ void moveball(int direction);
 //--------------------------
 enum Ball_States{ballposition}Ball_State;
 int Ball_Tick(int Ball_State);
-enum Player1_States{paddle1}Player1_State;
+enum Player1_States{waitingtostart,paddle1}Player1_State;
 int Player1_Tick(int Player1_State);
 enum Display_States{display, delay, clear}Display_State;
 int Display_Tick(int Display_State);
@@ -259,6 +259,14 @@ int Ball_Tick(int Ball_State){
 
 int Player1_Tick(int Player1_State){
 	switch(Player1_State){	
+		case waitingtostart:
+			if((gamemode != 0) && (game == 1)){
+				Player1_State = paddle1;
+			}
+			else{
+				Player1_State = waitingtostart;
+			}
+			break;
 		case paddle1:	
 			if(!P1UP && !P1DOWN){
 				//no movement
@@ -289,6 +297,12 @@ int Player1_Tick(int Player1_State){
 					P1MOVE = 1;
 					P1POS = P1POS + 1;
 				}
+			}
+			if(gameend == 1){
+				Player1_State = waitingtostart;
+			}
+			else{
+				Player1_State = paddle1;
 			}
 			break;
 		default: Player1_State = paddle1; break;
@@ -461,6 +475,7 @@ int Display_Tick(int Display_State){
 				transmit_data((1 << currbit), 1);
 				transmit_data(row[currow], 2);
 			}
+			PORTB = (P1Score << 5) + P2score;
 		}
 		if(gameend || !game){
 			transmit_data(0,1);
