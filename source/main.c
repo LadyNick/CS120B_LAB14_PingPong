@@ -31,7 +31,7 @@ unsigned char P1DOWN; //A1
 unsigned char P2UP;   //A2 later
 unsigned char P2DOWN; //A3 later
 unsigned char reset;  //A7 later
-unsigned char ballspeed = 300; //base
+unsigned short ballspeed = 300; //base
 unsigned char spin; //later for if the paddle moves when hitting ball
 unsigned char currbit = 6; //Which bit in the pattern is the ball
 unsigned char currow = 2; //which row the ball is in
@@ -343,7 +343,7 @@ int main(void) {
 	
     //MOVE PLAYER 1
     task2.state = start;
-    task2.period = 200; //base speed for how fast the user can move their paddle 
+    task2.period = 150; //base speed for how fast the user can move their paddle 
     task2.elapsedTime = task2.period;
     task2.TickFct = &Player1_Tick;
 	
@@ -355,7 +355,7 @@ int main(void) {
 
     //PLAYER2 AI
     task4.state = start;
-    task4.period = 200;
+    task4.period = 150;
     task4.elapsedTime = task4.period;
     task4.TickFct = &Player2_Tick;
 
