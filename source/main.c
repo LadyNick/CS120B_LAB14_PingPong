@@ -160,7 +160,7 @@ int Ball_Tick(int Ball_State){
 				if(P1MOVE == 1 ){
 					if((P1POS == 0) || (P1POS == 2)){ 
 					P1SPIN = true; 
-					}
+					}}
 				if(currow == P1POS + 1){//P1POS + 1 is the center of paddle1
 					direction = 1;
 					ballspeed += 50;
@@ -181,7 +181,7 @@ int Ball_Tick(int Ball_State){
 						direction = 5;
 					}
 					else{ direction = 6; }
-					if(P1SPIN == false{ // ^^
+					if(P1SPIN == false){ // ^^
 					ballspeed -= 50;
 					if(ballspeed <= 100){ ballspeed = 100; }
 					}
@@ -190,9 +190,10 @@ int Ball_Tick(int Ball_State){
 			if(currbit == 6){
 				P1SPIN = false; //reset spin from right to left
 				if(P2MOVE == 1){ 
-					if((P2AIPOS == 0) || (P2AIPOS == 2){
+					if((P2AIPOS == 0) || (P2AIPOS == 2)){
 						P2SPIN = true; 
 					}
+				}
 				if(currow == P2AIPOS + 1){//same things as above but for paddle2
 					direction = 2;
 					if(P2SPIN == false){
