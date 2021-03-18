@@ -361,7 +361,18 @@ int Player2_Tick(int Player2_State){
 				
 			} }
 			if(gamemode == 2){ //here goes P2 movements with double player
-				
+				if(P2 >= 540){
+					if(P2AIPOS == 0){
+						P2MOVE = 0;
+					}
+					else{ P2MOVE = 1; --P2APOS; } }
+				else if(P2 <= 468 ){
+					if(P2AIPOS == 2){
+						P2MOVE = 0;
+					}
+					else{ P2MOVE = 1; ++P2APOS; } }
+				}
+				else{ P2MOVE = 0; }
 			}
 			if(gameend == 1){
 				Player2_State = waitingformenu;
@@ -573,7 +584,7 @@ int main(void) {
     srand((int)time(0));
     
     while (1) {
-	    Set_A2D_Pin(0);
+	    Set_A2D_Pin(1);
 	    P2 = ADC;
 	    task1.period = ballspeed;
 	    task5.period = ballspeed;
