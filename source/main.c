@@ -338,28 +338,36 @@ int Player2_Tick(int Player2_State){
 			if(gamemode == 1){
 			if((rand() % 2) == 1){
 				//I want it to not be too hard to beat the AI because the matrix is so small
-					if(currow < P2AIPOS){
-						if(P2AIPOS == 0){ 
-							//do nothing
+				if((direction == 5) || (direction == 6)){
+					if(direction == 5){//moving up
+						if(P2AIPOS == 0){
 							P2MOVE = 0;
 						}
-						else{ 
-							--P2AIPOS;
-							P2MOVE = 1;
-						    }		
+						else{
+							P2MOVE = 1; --P2AIPOS;
+						}
 					}
-					if(currow > P2AIPOS){
+					else if(direction == 6){
 						if(P2AIPOS == 2){
-							//do nothing
 							P2MOVE = 0;
 						}
-						else{ 
-							++P2AIPOS; 
-						    	P2MOVE = 1;
-						    }
+						else{
+							P2MOVE = 1; ++P2AIPOS;
+						}
 					}
-				
-			} }
+				}
+				else if(direction == 1){
+					if(currow == (P2AIPOS + 1)}{
+						if(P2AIPOS == 2){
+							P2MOVE = 1; --P2AIPOS;	
+						}
+						else if(P2AIPOS == 0){
+							P2MOVE = 1; ++P2AIPOS;
+						}
+					}
+				}
+			} 
+			}
 			if(gamemode == 2){ //here goes P2 movements with double player
 				if(P2 >= 600){
 					if(P2AIPOS == 0){
