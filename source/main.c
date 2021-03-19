@@ -34,7 +34,7 @@ unsigned char P1POS = 1; //get position of paddle's highest bit by pattern index
 unsigned char P2AIPOS = 1; //this will get the higher part of the 3 bits position by it's pattern index
 unsigned char P1UP; //A0
 unsigned char P1DOWN; //A1
-unsigned short P2 = 0
+unsigned short P2 = 0;
 unsigned char reset;  //A7 later
 unsigned char P1MOVE = 0; //these will track whether or not the paddles are moving or just static
 unsigned char P2MOVE = 0;
@@ -522,7 +522,6 @@ int Menu_Tick(int Menu_State){
 
 int Display_Tick(int Display_State){
 	switch(Display_State){
-		//i have an idea so im going to ignore the computer paddle and the ball for now
 		case display:
 			if(donedisplay == 0){
 			Display_State = winnerdisplay;	
@@ -596,9 +595,10 @@ int Display_Tick(int Display_State){
 			else if(P2score == 5){
 				transmit_data(winner2pat[winnerupdate], 1);
 				transmit_data(winner2row[winnerupdate], 2);
-				++winnerupdate
+				++winnerupdate;
 				if(winnerupdate >= 21){ //size of arrays
 					winnerupdate = 0;
+				}
 			}
 			Display_State = delay;
 			break;
