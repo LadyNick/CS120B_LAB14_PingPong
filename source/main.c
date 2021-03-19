@@ -23,12 +23,18 @@
 //global variables
 //---------------------------
 unsigned char row[5] = {0xFE, 0xFD, 0xFB, 0xF7, 0xEF}; 
+unsigned char winner1pat[] = {};
+unsigned char winner1row[] = {};
+unsigned char winner2pat[] = {};
+unsigned char winner2row[] = {};
 unsigned char update = 0;
+unsigned char winnerupdate = 0;
+unsigned short winnercount = 0; //for display of winner
 unsigned char P1POS = 1; //get position of paddle's highest bit by pattern index
 unsigned char P2AIPOS = 1; //this will get the higher part of the 3 bits position by it's pattern index
 unsigned char P1UP; //A0
 unsigned char P1DOWN; //A1
-unsigned short P2 = 0;
+unsigned short P2 = 0
 unsigned char reset;  //A7 later
 unsigned char P1MOVE = 0; //these will track whether or not the paddles are moving or just static
 unsigned char P2MOVE = 0;
@@ -63,7 +69,7 @@ enum Ball_States{ballwait, ballposition}Ball_State;
 int Ball_Tick(int Ball_State);
 enum Player1_States{waitingtostart,paddle1}Player1_State;
 int Player1_Tick(int Player1_State);
-enum Display_States{display, delay, clear}Display_State;
+enum Display_States{display, delay, clear, winnerdisplay}Display_State;
 int Display_Tick(int Display_State);
 enum AI_States{AIoff, AIactive}AI_State;
 int AI_Tick(int AI_State);
@@ -466,6 +472,7 @@ int Menu_Tick(int Menu_State){
 				gameend = 1;
 				gamemode = 0;
 				game = 0;
+				donedisplay = 0;
 				Menu_State = gameover;
 			}
 			else if(reset){
@@ -500,6 +507,10 @@ int Menu_Tick(int Menu_State){
 				Menu_State = resetsetup;	
 			}
 			else{
+				winnercount += ballspeed;
+				if(winnercount >= 5000){
+					donedisplay = 1;
+				}
 				Menu_State = gameover;
 			}
 			break;
@@ -512,6 +523,10 @@ int Display_Tick(int Display_State){
 	switch(Display_State){
 		//i have an idea so im going to ignore the computer paddle and the ball for now
 		case display:
+			if(donedisplay == 0){
+			Display_State = winnerdisplay;	
+			}
+			else{
 			if((update >= 0) && (update < 3)){
 				transmit_data(0x01, 1);
 			}
@@ -546,21 +561,46 @@ int Display_Tick(int Display_State){
 			}
 			PORTB = (P2score << 3) + P1score;
 			Display_State = delay;
-		//	PORTB = (((gameend << 1) + game) << 1) + (Single >> 5);
+			}
 			break;
 		case delay:
-			++update;
-			if(update == 7){
-				update = 0;
+			if(donedisplay == 1){
+				++update;
+				if(update == 7){
+					update = 0;
+				}
 			}
 			Display_State = clear;
 			break;
 		case clear:
 			transmit_data(0,1);
 			transmit_data(0xFF, 2);
-			Display_State = display;
+			if(donedisplay == 1){
+				winnerupdate = 0;
+				Display_State = display;
+			}
+			else{
+				Display_State = winnerdisplay;
+			}
 			break;	
-		//case delay: Display_State = display; break;
+		case winnerdisplay:
+			if(P1score == 5){
+				transmit_data(winner1pat[winnerupdate], 1);
+				transmit_data(winner1row[winnerupdate], 2);
+				++winnerupdate;
+				if(winnerupdate == ){ //size of arrays
+					winnerupdate = 0;
+				}
+			}
+			else if(P2score == 5){
+				transmit_data(winner2pat[winnerupdate], 1);
+				transmit_data(winner2row[winnerupdate], 2);
+				++winnerupdate
+				if(winnerupdate == ){ //size of arrays
+					winnerupdate = 0;
+			}
+			Display_State = delay;
+			break;
 		default: Display_State = display; break;
 	}
 	return Display_State;
