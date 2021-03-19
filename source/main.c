@@ -23,10 +23,10 @@
 //global variables
 //---------------------------
 unsigned char row[5] = {0xFE, 0xFD, 0xFB, 0xF7, 0xEF}; 
-unsigned char winner1pat[] = {};
-unsigned char winner1row[] = {};
-unsigned char winner2pat[] = {};
-unsigned char winner2row[] = {};
+unsigned char winner1pat[18] = {0x40, 0x20, 0x10, 0x04, 0x02, 0x40, 0x10, 0x02, 0x40, 0x20, 0x10, 0x02, 0x40, 0x02, 0x40, 0x04, 0x02, 0x01};
+unsigned char winner1row[18] = {0xFE, 0xFE, 0xFE, 0xFE, 0xFE, 0xFD, 0xFD, 0xFD, 0xFB, 0xFB, 0xFB, 0xFB, 0xF7, 0xF7, 0xEF, 0xEF, 0xEF, 0xEF};
+unsigned char winner2pat[21] = {0x40, 0x20, 0x10, 0x04, 0x02, 0x01, 0x40, 0x10, 0x01, 0x40, 0x20, 0x10, 0x04, 0x02, 0x01, 0x40, 0x04, 0x40, 0x04, 0x02, 0x01};
+unsigned char winner2row[21] = {0xFE, 0xFE, 0xFE, 0xFE, 0xFE, 0xFE, 0xFD, 0xFD, 0xFD, 0xFB, 0xFB, 0xFB, 0xFB, 0xFB, 0xFB, 0xF7, 0xF7, 0xEF, 0xEF, 0xEF, 0xEF};
 unsigned char update = 0;
 unsigned char winnerupdate = 0;
 unsigned short winnercount = 0; //for display of winner
@@ -510,6 +510,7 @@ int Menu_Tick(int Menu_State){
 				winnercount += ballspeed;
 				if(winnercount >= 5000){
 					donedisplay = 1;
+					winnercount = 0;
 				}
 				Menu_State = gameover;
 			}
@@ -588,7 +589,7 @@ int Display_Tick(int Display_State){
 				transmit_data(winner1pat[winnerupdate], 1);
 				transmit_data(winner1row[winnerupdate], 2);
 				++winnerupdate;
-				if(winnerupdate == ){ //size of arrays
+				if(winnerupdate >= 18){ //size of arrays
 					winnerupdate = 0;
 				}
 			}
@@ -596,7 +597,7 @@ int Display_Tick(int Display_State){
 				transmit_data(winner2pat[winnerupdate], 1);
 				transmit_data(winner2row[winnerupdate], 2);
 				++winnerupdate
-				if(winnerupdate == ){ //size of arrays
+				if(winnerupdate >= 21){ //size of arrays
 					winnerupdate = 0;
 			}
 			Display_State = delay;
