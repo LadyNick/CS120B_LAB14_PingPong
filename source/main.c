@@ -1,8 +1,8 @@
 /*	Author: Nicole Navarro
  *  Partner(s) Name: 
  *	Lab Section: 21
- *	Assignment: Lab #14  Exercise #2
- *	Video Demo: https://youtu.be/o6LEndD8ZW8
+ *	Assignment: Lab #14  Exercise #3
+ *	Video Demo: https://youtu.be/Q5ylXBRIt20
  *	Exercise Description: [optional - include for your own benefit]
  *
  *	I acknowledge all content contained herein, excluding template or example
@@ -364,6 +364,28 @@ int Player2_Tick(int Player2_State){
 						else if(P2AIPOS == 0){
 							P2MOVE = 1; ++P2AIPOS;
 						}
+					}
+				}
+				else{
+					if(currow < P2AIPOS){
+						if(P2AIPOS == 0){ 
+							//do nothing
+							P2MOVE = 0;
+						}
+						else{ 
+							--P2AIPOS;
+							P2MOVE = 1;
+						    }		
+					}
+					if(currow > P2AIPOS){
+						if(P2AIPOS == 2){
+							//do nothing
+							P2MOVE = 0;
+						}
+						else{ 
+							++P2AIPOS; 
+						    	P2MOVE = 1;
+						    }
 					}
 				}
 			} 

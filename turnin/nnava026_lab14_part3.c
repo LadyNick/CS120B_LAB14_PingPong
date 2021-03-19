@@ -366,6 +366,28 @@ int Player2_Tick(int Player2_State){
 						}
 					}
 				}
+				else{
+					if(currow < P2AIPOS){
+						if(P2AIPOS == 0){ 
+							//do nothing
+							P2MOVE = 0;
+						}
+						else{ 
+							--P2AIPOS;
+							P2MOVE = 1;
+						    }		
+					}
+					if(currow > P2AIPOS){
+						if(P2AIPOS == 2){
+							//do nothing
+							P2MOVE = 0;
+						}
+						else{ 
+							++P2AIPOS; 
+						    	P2MOVE = 1;
+						    }
+					}
+				}
 			} 
 			}
 			if(gamemode == 2){ //here goes P2 movements with double player
