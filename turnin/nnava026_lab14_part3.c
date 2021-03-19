@@ -1,8 +1,8 @@
 /*	Author: Nicole Navarro
  *  Partner(s) Name: 
  *	Lab Section: 21
- *	Assignment: Lab #14  Exercise #2
- *	Video Demo: https://youtu.be/o6LEndD8ZW8
+ *	Assignment: Lab #14  Exercise #3
+ *	Video Demo: https://youtu.be/Q5ylXBRIt20
  *	Exercise Description: [optional - include for your own benefit]
  *
  *	I acknowledge all content contained herein, excluding template or example
